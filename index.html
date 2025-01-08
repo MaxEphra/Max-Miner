@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dogecoin Miner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1a1a1a;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    #wallet-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 50px;
+      cursor: pointer;
+    }
+
+    #modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 1000;
+      width: 300px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    #modal h2 {
+      margin: 0 0 10px;
+      font-size: 24px;
+      color: #fff;
+    }
+
+    #modal .doge-icon {
+      margin: 15px auto;
+      display: block;
+      width: 60px;
+      height: 60px;
+    }
+
+    #modal .balance {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    #modal .usd-balance {
+      font-size: 18px;
+      color: #ccc;
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 999;
+    }
+
+    #progress-bar {
+      width: 80%;
+      background-color: #333;
+      border-radius: 10px;
+      margin: 20px auto;
+      position: relative;
+      height: 25px;
+    }
+
+    #progress-fill {
+      background-color: #f4a62a;
+      height: 100%;
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    #controls {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #start-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+    #stop-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>Max Dogecoin Miner</h1>
+  <img id="wallet-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEZElEQVR4AaXTA7Aj2xrF8d/eu3PGeLZt2zbL9WzbdunZtm3btq079sw5Qae79+25SVXX5GCQVfWv/pLGWr2+xNrKtMSWXsuGlgV5aztfLcn3O/e19776+j/81Jtv17zxUbcdvvVGN9n/oQu+Pm93q8V3uMmBD7j2rk+60f4PWUtBJ5tlYzSAgBKJbS1Xz1wP1zSZr7zpiof3XvljX7X5ygcvnOv4X/wuxPo3dbnwy3K0/hc5NbsuuvXv+ajzKIeblEsb7XMpfznPjQkBhPWygBoZY/TYmNkeuErLLTM3wSVxERSQsfHyR3dc7n3ftfGKhy4SYyOlSmiPIeR9IdX/zdmv6/HCd2JsfpaFPf/+wc2XrnDrrzaDpS2G1XoXG20TClmFBc6dJyZXw81xk6nhBiQzylh/2cUdl3z7T9sgRy4SQiOmSipq7bGlntIM2lYO5Dr9KgvfiUX1i9Hipn9/71kP2HGHV789h0K+ZOC+02qvgUsjOgUtXKa/4yKv+631lzt2kRimhsfNi1rq5u779hhC3puF36ai+mVuwseLyFUzL0DhNJWboBxsZDFrA4hFNTWezDGtGOr87Xy73MTbhpAPFUgIzkBNE436GzVLxMkKJibdGrpQM42kVOUQm6Iwh3ITlccDLEYxnmgwNRG7QMvbiXWeL8C0gWqpEOPKJl2Qme+Oz7ER5w4w2Gi4tNlwcZPR4mbt3LLJsJ1Hx2nn9jstk++62aBlvgZyUA8WWOwJMZvuWSpW3Lk4005IzXwBNBgGud8SaVISYk+VGqFotCYzoZavYP4AA/QRkcgpyDGRkjr1hNS0dGFOCBLrOQNkDDFAnJImdIGiFk0qhJRV00Ap1cI0QIP5GwgoVg7R0rWTEjGpzwkkF5kjqJHO7DeA/kwDHWt8F3KO9kccwf65VtCfMug4he9qff+Lgf34FczVwCwDrP3dXw3aADV7Mt894wYGWs4oxHcM7YyBCt/Dn+ZqYDbI2ivYo+9rDjgaG1T8Cp9Fc9oNlJ3BmkGWTvj8VUM/UFP0kKnw/swtcGOnqJBbSsQJuUUHacW/5d8V3i047AsUI8ENZH/gzyWvwuVwvtNpIATElcknhlmSvK3l+zIEEX6KPjJfwBuw6FTUTBsYTQhTdAhTwlBl6MNG3o5aAUQgSAiM8Gq8CYNTbmDGOCwP0yh9wtgLQu2IEb4RQJh94nrUnBcvxEOxzmqKduRNKFwkr76CLPlkyzOL4J9lxF8622hGFRr2B56PV+DgWg2EcoW37hiE0tvj2JObyj+rRqeVAwRp+soVB1tehqfij6sFMF51Bf9XemEce1Zu/L+H2HRv3zmuqiwgo8f18XjcHVt02gG4CAi0lJJv5sKrq9K3e+dSwXj/ylbBGtogKzENsjVyZzwcN8BG7ARcGGP8Du8PwUeqrfaEknqwtk1gbfVkuhBaLhy4C+6Ni2MBuzOfDXxuzN96CYHUMhzPE2BGhcxUkYs2XBULgT+t5x9DjE/z0WcDFGV3GnngM08AAAAASUVORK5CYII=" alt=" ">
+  
+  <div id="mining-container">
+    <div id="progress-bar">
+      <div id="progress-fill"></div>
+    </div>
+    <div id="status">Aguardando início da mineração...</div>
+    <div id="mined-amount">DOGE Minerados: 0</div>
+  </div>
+
+  <div id="controls">
+    <button id="start-btn">Iniciar Mineração</button>
+    <button id="stop-btn" disabled>Parar Mineração</button>
+  </div>
+
+  <!-- Modal da Wallet -->
+  <div id="overlay"></div>
+  <div id="modal">
+    <h2>DOGE</h2>
+    <p>COIN | Dogecoin</p>
+    <img class="doge-icon" src="https://cryptologos.cc/logos/dogecoin-doge-logo.png" alt="Doge Icon">
+    <div class="balance" id="wallet-balance">0 DOGE</div>
+    <div class="usd-balance" id="usd-balance">$0.00</div>
+    <button onclick="closeModal()">Fechar</button>
+  </div>
+
+  <script>
+    const progressFill = document.getElementById('progress-fill');
+    const status = document.getElementById('status');
+    const minedAmount = document.getElementById('mined-amount');
+    const walletBalance = document.getElementById('wallet-balance');
+    const usdBalance = document.getElementById('usd-balance');
+    const overlay = document.getElementById('overlay');
+    const modal = document.getElementById('modal');
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+
+    let dogeCount = 0;
+    let miningInterval = null;
+    let dogeToUsdRate = 0.07; // Valor padrão, caso a API falhe
+
+    // Função para atualizar o preço do Dogecoin em tempo real
+    async function fetchDogePrice() {
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=dogecoin&vs_currencies=usd');
+        const data = await response.json();
+        dogeToUsdRate = data.dogecoin.usd;
+        updateBalances();
+      } catch (error) {
+        console.error("Erro ao obter o preço do Dogecoin:", error);
+      }
+    }
+
+    function simulateMining() {
+      let progress = 0;
+
+      status.textContent = "Antminer S21 XP Hydro 473TH";
+
+      miningInterval = setInterval(() => {
+        progress += Math.random() * 10; // Incrementa progressivamente
+        progressFill.style.width = `${Math.min(progress, 100)}%`;
+
+        if (progress >= 100) {
+          progress = 0;
+          const mined = Math.floor(Math.random() * 5 + 1); // Entre 1 e 5 DOGE por ciclo
+          dogeCount += mined;
+          updateBalances();
+          progressFill.style.width = '0%';
+        }
+      }, 200); // Atualização rápida para simular atividade
+    }
+
+    function updateBalances() {
+      minedAmount.textContent = `DOGE Minerados: ${dogeCount}`;
+      walletBalance.textContent = `${dogeCount} DOGE`;
+      usdBalance.textContent = `$${(dogeCount * dogeToUsdRate).toFixed(2)}`;
+    }
+
+    function startMining() {
+      if (!miningInterval) {
+        simulateMining();
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+      }
+    }
+
+    function stopMining() {
+      clearInterval(miningInterval);
+      miningInterval = null;
+      status.textContent = "Mineração pausada.";
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    }
+
+    function openModal() {
+      modal.style.display = 'block';
+      overlay.style.display = 'block';
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+      overlay.style.display = 'none';
+    }
+
+    // Carregar o preço do Dogecoin ao carregar a página
+    window.onload = fetchDogePrice;
+
+    document.getElementById('wallet-icon').addEventListener('click', openModal);
+    startBtn.addEventListener('click', startMining);
+    stopBtn.addEventListener('click', stopMining);
+  </script>
+</body>
+</html>
+
+
+
