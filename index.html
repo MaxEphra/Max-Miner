@@ -112,6 +112,30 @@
       background-color: #dc3545;
       color: white;
     }
+
+    #hashes-container {
+      margin-top: 20px;
+      color: #ccc;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    .hash {
+      margin: 5px 0;
+      word-wrap: break-word;
+    }
+
+    #doges-mined {
+      font-size: 22px;
+      font-weight: bold;
+      color: #f4a62a;
+      margin: 20px 0;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    .doge-text {
+      color: #fff;
+      font-size: 18px;
+    }
   </style>
 </head>
 <body>
@@ -123,12 +147,18 @@
       <div id="progress-fill"></div>
     </div>
     <div id="status">Aguardando início da mineração...</div>
-    <div id="mined-amount">DOGE Minerados: 0</div>
+    <div id="doges-mined" class="doge-text">DOGE Minerados: 0</div>
   </div>
 
   <div id="controls">
     <button id="start-btn">Iniciar Mineração</button>
     <button id="stop-btn" disabled>Parar Mineração</button>
+  </div>
+
+  <!-- Contêiner de hashes simuladas -->
+  <div id="hashes-container">
+    <h3>Hashes de Mineração:</h3>
+    <div id="hashes"></div>
   </div>
 
   <!-- Modal da Wallet -->
@@ -145,7 +175,8 @@
   <script>
     const progressFill = document.getElementById('progress-fill');
     const status = document.getElementById('status');
-    const minedAmount = document.getElementById('mined-amount');
+    const dogesMined = document.getElementById('doges-mined');
+    const hashesContainer = document.getElementById('hashes');
     const walletBalance = document.getElementById('wallet-balance');
     const usdBalance = document.getElementById('usd-balance');
     const overlay = document.getElementById('overlay');
@@ -156,6 +187,7 @@
     let dogeCount = 0;
     let miningInterval = null;
     let dogeToUsdRate = 0.07; // Valor padrão, caso a API falhe
+    let hashInterval = null;
 
     // Função para atualizar o preço do Dogecoin em tempo real
     async function fetchDogePrice() {
@@ -172,7 +204,7 @@
     function simulateMining() {
       let progress = 0;
 
-      status.textContent = "Antminer S21 XP Hydro 473TH";
+      status.textContent = "Max Antminer S21 XP Hydro 474TH";
 
       miningInterval = setInterval(() => {
         progress += Math.random() * 10; // Incrementa progressivamente
@@ -184,14 +216,25 @@
           dogeCount += mined;
           updateBalances();
           progressFill.style.width = '0%';
+
+          // Gerar hash simulada
+          generateHash();
         }
       }, 200); // Atualização rápida para simular atividade
     }
 
     function updateBalances() {
-      minedAmount.textContent = `DOGE Minerados: ${dogeCount}`;
+      dogesMined.textContent = `DOGE Minerados: ${dogeCount}`;
       walletBalance.textContent = `${dogeCount} DOGE`;
       usdBalance.textContent = `$${(dogeCount * dogeToUsdRate).toFixed(2)}`;
+    }
+
+    function generateHash() {
+      const randomHash = '0x' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const hashDiv = document.createElement('div');
+      hashDiv.classList.add('hash');
+      hashDiv.textContent = randomHash;
+      hashesContainer.appendChild(hashDiv);
     }
 
     function startMining() {
@@ -199,12 +242,16 @@
         simulateMining();
         startBtn.disabled = true;
         stopBtn.disabled = false;
+        // Iniciar geração de hashes
+        hashInterval = setInterval(generateHash, 1500);
       }
     }
 
     function stopMining() {
       clearInterval(miningInterval);
+      clearInterval(hashInterval);
       miningInterval = null;
+      hashInterval = null;
       status.textContent = "Mineração pausada.";
       startBtn.disabled = false;
       stopBtn.disabled = true;
