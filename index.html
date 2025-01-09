@@ -315,7 +315,7 @@
     function updateBalances() {
       cryptoCount = saldos[currentAsset];
 
-      cryptoMined.textContent = `${cryptoData[currentAsset].name} Minerados: ${cryptoCount}`;
+      cryptoMined.textContent = `${cryptoData[currentAsset].name} Mined: ${cryptoCount}`;
       walletBalance.textContent = `${cryptoCount} ${cryptoData[currentAsset].name}`;
       usdBalance.textContent = `$${(cryptoCount * cryptoToUsdRate).toFixed(2)}`;
     }
