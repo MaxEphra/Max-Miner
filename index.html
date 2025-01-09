@@ -294,7 +294,7 @@
 
     function simulateMining() {
       let progress = 0;
-      status.textContent = "Mining in progress...";
+      status.textContent = "Mining in Progress...";
 
       miningInterval = setInterval(() => {
         progress += Math.random() * 10;
@@ -347,7 +347,7 @@
       clearInterval(hashInterval);
       miningInterval = null;
       hashInterval = null;
-      status.textContent = "Mineração pausada.";
+      status.textContent = "Mining Paused.";
       startBtn.disabled = false;
       stopBtn.disabled = true;
       saveLocalStorage(); // Salvar o estado ao parar a mineração
